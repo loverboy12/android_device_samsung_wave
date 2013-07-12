@@ -32,6 +32,7 @@
 #include <fcntl.h>
 
 #include "AudioHardware.h"
+#include <media/AudioRecord.h>
 #include <audio_effects/effect_aec.h>
 #include <hardware_legacy/power.h>
 
@@ -384,15 +385,6 @@ status_t AudioHardware::setMode(int mode)
     status = AudioHardwareBase::setMode(mode);
     ALOGV("setMode() : new %d, old %d", mMode, prevMode);
     if (status == NO_ERROR) {
-        // activate call clock in radio when entering in call mode
-       /* if (mMode == AudioSystem::MODE_IN_CALL)
-        {
-            if ((!mActivatedCP) && (mSecRilLibHandle) && (connectRILDIfRequired() == OK)) {
-                setCallClockSync(mRilClient, SOUND_CLOCK_START);
-                mActivatedCP = true;
-            }
-        }
-*/
         if (mMode == AudioSystem::MODE_IN_CALL && !mInCallAudioMode) {
             if (spOut != 0) {
                 ALOGV("setMode() in call force output standby");
@@ -439,10 +431,7 @@ status_t AudioHardware::setMode(int mode)
             mInCallAudioMode = false;
         }
 
-        if (mMode == AudioSystem::MODE_NORMAL) {
-            if(mActivatedCP)
-                mActivatedCP = false;
-        }
+
     }
 
     if (spIn != 0) {
@@ -628,6 +617,7 @@ void AudioHardware::setVoiceVolume_l(float volume)
                 break;
 
             case AudioSystem::DEVICE_OUT_SPEAKER:
+            case AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET:
                 ALOGD("### speaker call volume");
                 type = SOUND_TYPE_SPEAKER;
                 break;
@@ -772,6 +762,7 @@ status_t AudioHardware::setIncallPath_l(uint32_t device)
                     break;
 
                 case AudioSystem::DEVICE_OUT_SPEAKER:
+                case AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET:
                     ALOGD("### incall mode speaker route");
                     path = SOUND_AUDIO_PATH_SPEAKER;
                     break;
@@ -1053,6 +1044,9 @@ const char *AudioHardware::getOutputRouteFromDevice(uint32_t device)
     switch (device) {
     case AudioSystem::DEVICE_OUT_EARPIECE:
         return "RCV";
+    case AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET:
+        if (mMode == AudioSystem::MODE_RINGTONE) return "RING_SPK";
+        else return "EXTRA_DOCK_SPEAKER";
     case AudioSystem::DEVICE_OUT_SPEAKER:
         if (mMode == AudioSystem::MODE_RINGTONE) return "RING_SPK";
         else return "SPK";
@@ -1064,6 +1058,7 @@ const char *AudioHardware::getOutputRouteFromDevice(uint32_t device)
         else return "HP";
     case (AudioSystem::DEVICE_OUT_SPEAKER|AudioSystem::DEVICE_OUT_WIRED_HEADPHONE):
     case (AudioSystem::DEVICE_OUT_SPEAKER|AudioSystem::DEVICE_OUT_WIRED_HEADSET):
+    case (AudioSystem::DEVICE_OUT_SPEAKER|AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET):
         if (mMode == AudioSystem::MODE_RINGTONE) return "RING_SPK_HP";
         else return "SPK_HP";
     case AudioSystem::DEVICE_OUT_BLUETOOTH_SCO:
@@ -1081,6 +1076,7 @@ const char *AudioHardware::getVoiceRouteFromDevice(uint32_t device)
     case AudioSystem::DEVICE_OUT_EARPIECE:
         return "RCV";
     case AudioSystem::DEVICE_OUT_SPEAKER:
+    case AudioSystem::DEVICE_OUT_ANLG_DOCK_HEADSET:
         return "SPK";
     case AudioSystem::DEVICE_OUT_WIRED_HEADPHONE:
     case AudioSystem::DEVICE_OUT_WIRED_HEADSET:
@@ -1180,11 +1176,11 @@ status_t AudioHardware::setInputSource_l(audio_source source)
                  switch (source) {
                      case AUDIO_SOURCE_DEFAULT: // intended fall-through
                      case AUDIO_SOURCE_MIC:
+					case AUDIO_SOURCE_VOICE_COMMUNICATION:
+                         sourceName = inputPathNameVoiceCommunication;
+					break;
                      case AUDIO_SOURCE_CAMCORDER:
                          sourceName = inputPathNameCamcorder;
-                         break;
-                     case AUDIO_SOURCE_VOICE_COMMUNICATION:
-                         sourceName = inputPathNameVoiceCommunication;
                          break;
                      case AUDIO_SOURCE_VOICE_RECOGNITION:
                          sourceName = inputPathNameVoiceRecognition;
