@@ -141,6 +141,12 @@ TARGET_DISABLE_TRIPLE_BUFFERING := false
 
 BOARD_ALLOW_EGL_HIBERNATION := true
 
+# Enable WEBGL in WebKit
+ENABLE_WEBGL := true
+
+# HWComposer
+BOARD_USES_HWCOMPOSER := true
+
 # Include wave specific stuff
 -include device/samsung/wave/Android.mk
 
