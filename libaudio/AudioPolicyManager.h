@@ -34,5 +34,12 @@ public:
 
         virtual ~AudioPolicyManager() {}
 
+protected:
+        // true is current platform implements a back microphone
+        virtual bool hasBackMicrophone() const { return false; }
+
+        // true is current platform supports duplication of notifications and ringtones over A2DP output
+        virtual bool a2dpUsedForSonification() const { return true; }
+
 };
 };

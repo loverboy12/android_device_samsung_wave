@@ -137,6 +137,7 @@ public:
             status_t setInputSource_l(audio_source source);
 
             void setVoiceVolume_l(float volume);
+            status_t pcmIfEn_l(bool state);
 
     static uint32_t    getInputSampleRate(uint32_t sampleRate);
            sp <AudioStreamInALSA> getActiveInput_l();
@@ -194,6 +195,7 @@ private:
     int             (*connectRILD)     (HRilClient);
     int             (*setVolume)   (HRilClient, SoundType, int);
     int             (*setAudioPath)(HRilClient, AudioPath);
+    int             (*pcmIfCtrl)(HRilClient, int);
     void            loadRILD(void);
     status_t        connectRILDIfRequired(void);
     struct echo_reference_itfe *mEchoReference;

@@ -34,6 +34,7 @@ on boot
     setprop ro.telephony.call_ring.multiple 0
 
 on fs
+
 	mkdir /mnt/bada_system
     chmod 0777 /mnt/bada_system
     mount vfat /dev/block/mmcblk0p1 /mnt/bada_system noatime
@@ -47,32 +48,93 @@ on fs
     mount ext4 loop@/mnt/bada_system/cache.img /cache noatime
     mount ext4 loop@/mnt/bada_app/data.img /data noatime
 
+
+# New way vold 4.3
+    mount_all fstab.wave
+
 # permissions for bluetooth.
     chown bluetooth net_bt_stack /dev/s3c2410_serial0
     chmod 0600 /dev/s3c2410_serial0
     chmod 0660 /sys/class/rfkill/rfkill0/state
     chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
     chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
+    restorecon /sys/class/rfkill/rfkill0/state
+    restorecon /sys/class/rfkill/rfkill0/type
 
 # Permissions for Battery Control
 
-     chmod 0666 /sys/devices/platform/i2c-gpio.6/i2c-6/6-0066/max8998-charger/power_supply/battery/capacity
+    chmod 0666 /sys/devices/platform/i2c-gpio.6/i2c-6/6-0066/max8998-charger/power_supply/battery/capacity
     chmod 0666 /sys/devices/platform/i2c-gpio.6/i2c-6/6-0066/max8998-charger/power_supply/ac/online
     chmod 0666 /sys/devices/platform/i2c-gpio.6/i2c-6/6-0066/max8998-charger/power_supply/usb/online
 
 # Permissions for System Server and daemons.
     chown system system /sys/class/backlight/s5p_bl/brightness
+    chmod 0666 /sys/class/backlight/panel/brightness
 
 # change permission for uart_switch
     chown radio radio /sys/class/sec/uart_switch/UART_SEL/value
     chmod 660 /sys/class/sec/uart_switch/UART_SEL/value
 
+    chown system system /sys/class/misc/pwm_duty/pwm_duty
+    chmod 660 /sys/class/misc/pwm_duty/pwm_duty
+    restorecon /sys/class/misc/pwm_duty/pwm_duty
+
+    chown system system /sys/class/mdnieset_ui/switch_mdnieset_ui/mdnieset_ui_file_cmd
+    chmod 660 /sys/class/mdnieset_ui/switch_mdnieset_ui/mdnieset_ui_file_cmd
+    restorecon /sys/class/mdnieset_ui/switch_mdnieset_ui/mdnieset_ui_file_cmd
+
+    chown system system /sys/devices/virtual/misc/color_tuning/blue_multiplier
+    chown system system /sys/devices/virtual/misc/color_tuning/blue_v1_offset
+    chown system system /sys/devices/virtual/misc/color_tuning/green_multiplier
+    chown system system /sys/devices/virtual/misc/color_tuning/green_v1_offset
+    chown system system /sys/devices/virtual/misc/color_tuning/red_multiplier
+    chown system system /sys/devices/virtual/misc/color_tuning/red_v1_offset
+    chmod 660 /sys/devices/virtual/misc/color_tuning/blue_multiplier
+    chmod 660 /sys/devices/virtual/misc/color_tuning/blue_v1_offset
+    chmod 660 /sys/devices/virtual/misc/color_tuning/green_multiplier
+    chmod 660 /sys/devices/virtual/misc/color_tuning/green_v1_offset
+    chmod 660 /sys/devices/virtual/misc/color_tuning/red_multiplier
+    chmod 660 /sys/devices/virtual/misc/color_tuning/red_v1_offset
+    restorecon /sys/devices/virtual/misc/color_tuning/blue_multiplier
+    restorecon /sys/devices/virtual/misc/color_tuning/blue_v1_offset
+    restorecon /sys/devices/virtual/misc/color_tuning/green_multiplier
+    restorecon /sys/devices/virtual/misc/color_tuning/green_v1_offset
+    restorecon /sys/devices/virtual/misc/color_tuning/red_multiplier
+    restorecon /sys/devices/virtual/misc/color_tuning/red_v1_offset
+
+# Intentionally left world-writable for Voodoo Sound app
+    restorecon /sys/devices/virtual/misc/voodoo_sound/adc_osr128
+    restorecon /sys/devices/virtual/misc/voodoo_sound/dac_direct
+    restorecon /sys/devices/virtual/misc/voodoo_sound/dac_osr128
+    restorecon /sys/devices/virtual/misc/voodoo_sound/debug_log
+    restorecon /sys/devices/virtual/misc/voodoo_sound/digital_gain
+    restorecon /sys/devices/virtual/misc/voodoo_sound/fll_tuning
+    restorecon /sys/devices/virtual/misc/voodoo_sound/fm_radio_headset_normalize_gain
+    restorecon /sys/devices/virtual/misc/voodoo_sound/fm_radio_headset_restore_bass
+    restorecon /sys/devices/virtual/misc/voodoo_sound/fm_radio_headset_restore_highs
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_amplifier_level
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_eq
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_eq_b1_gain
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_eq_b2_gain
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_eq_b3_gain
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_eq_b4_gain
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_eq_b5_gain
+    restorecon /sys/devices/virtual/misc/voodoo_sound/headphone_eq_bands_values
+    restorecon /sys/devices/virtual/misc/voodoo_sound/mono_downmix
+    restorecon /sys/devices/virtual/misc/voodoo_sound/recording_preset
+    restorecon /sys/devices/virtual/misc/voodoo_sound/speaker_tuning
+    restorecon /sys/devices/virtual/misc/voodoo_sound/stereo_expansion
+    restorecon /sys/devices/virtual/misc/voodoo_sound/stereo_expansion_gain
+
 on post-fs
-    #symlinks for samsung RIL
+    # we will remap this as /mnt/sdcard with the sdcard fuse tool
+    mkdir /data/media 0775 media_rw media_rw
+    chown media_rw media_rw /data/media
 
     mkdir /data/radio
     chown radio radio /data/radio
     chmod 0666 /data/radio
+    exec /system/bin/restorecon -r /data/radio
 
 	
 # allow system to modify cpufreq control files
@@ -108,6 +170,7 @@ on post-fs-data
 
     setprop vold.post_fs_data_done 1
 
+# Not sure lat_start work on 4.3
 on property:dev.bootcomplete=1
     class_start late_start
 
@@ -170,10 +233,11 @@ service iprenew_bnep0 /system/bin/dhcpcd -n
 service bdaddr /system/bin/bdaddr_read
     class main
     user root
+    group system bluetooth
     disabled
     oneshot
 
-on property:init.svc.bootanim=running
+on property:ril.bt_macaddr=*
     start bdaddr
 
 # bugreport is triggered by holding down volume down, volume up and power
@@ -185,7 +249,9 @@ on property:init.svc.bootanim=running
 
 #- End main Services -#
 
-#- Begin late_start Services-#
+#- Begin late_start Services -#
+
+#- If doesnt run then make it class main -#
 
 service orientationd /system/vendor/bin/orientationd
     class late_start
@@ -202,3 +268,20 @@ service tvouthack /system/bin/tvouthack
     user system
     group graphics
     disabled
+
+# Su daemon need some stude on rasco work but on cm dont run 
+# You can add on init.d "su --daemon" or add ro.persist.sys.root_access=3 on build.prop
+service su_daemon /system/xbin/su --daemon
+    oneshot
+
+on property:persist.sys.root_access=0
+    stop su_daemon
+
+on property:persist.sys.root_access=2
+    stop su_daemon
+
+on property:persist.sys.root_access=1
+    start su_daemon
+
+on property:persist.sys.root_access=3
+    start su_daemon

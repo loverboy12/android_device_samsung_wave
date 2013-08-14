@@ -50,6 +50,7 @@ int main() {
 
     // Set bluetooth owner
     fchown(fd, 1002, 1002);
+    fchmod(fd, 0660);
 
     close(fd);
     property_set("ro.bt.bdaddr_path", BDADDR_PATH);

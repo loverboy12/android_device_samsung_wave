@@ -27,7 +27,6 @@
 
 #include <linux/input.h>
 
-
 #include <utils/Atomic.h>
 #include <utils/Log.h>
 
@@ -50,14 +49,12 @@
 #define SENSORS_ORIENTATION      (1<<ID_O)
 #define SENSORS_LIGHT            (1<<ID_L)
 #define SENSORS_PROXIMITY        (1<<ID_P)
-#define SENSORS_GYROSCOPE        (1<<ID_GY)
 
 #define SENSORS_ACCELERATION_HANDLE     0
 #define SENSORS_MAGNETIC_FIELD_HANDLE   1
 #define SENSORS_ORIENTATION_HANDLE      2
 #define SENSORS_LIGHT_HANDLE            3
 #define SENSORS_PROXIMITY_HANDLE        4
-#define SENSORS_GYROSCOPE_HANDLE        5
 
 #define AKM_FTRACE 0
 #define AKM_DEBUG 0
@@ -79,8 +76,8 @@ static const struct sensor_t sSensorList[] = {
 		{ "CM Hacked Orientation Sensor",
           "CM Team",
           1, SENSORS_ORIENTATION_HANDLE,
-          SENSOR_TYPE_ORIENTATION,  360.0f, CONVERT_O, 7.8f, 10000, { } },
-        { "GP2A Proximity sensor",
+          SENSOR_TYPE_ORIENTATION, 360.0f, CONVERT_O, 7.8f, 10000, { } },
+               { "GP2A Proximity sensor",
           "Sharp",
           1, SENSORS_PROXIMITY_HANDLE,
           SENSOR_TYPE_PROXIMITY, 5.0f, 5.0f, 0.75f, 0, { } },        
@@ -127,10 +124,10 @@ struct sensors_poll_context_t {
 private:
     enum {
         proximity       = 0,
-        akm           	= 1,
-		orientation 	= 2, 
-		bosch 			= 3,        
-		numSensorDrivers,
+        akm            = 1,
+       orientation            = 2,
+bosch 			= 3,  
+        numSensorDrivers,
         numFds,
     };
 
@@ -149,16 +146,14 @@ private:
 
     int handleToDriver(int handle) const {
         switch (handle) {
-           
-        case ID_A:
-            return bosch;
-	    case ID_M:
-            return akm;
-	    case ID_O:
-			return orientation;
-	    case ID_P:
-			return proximity;
-                 
+            case ID_A:
+            	return bosch;
+	    	case ID_M:
+            	return akm;
+	    	case ID_O:
+				return orientation;
+	    	case ID_P:
+                return proximity;
         }
         return -EINVAL;
     }
@@ -168,7 +163,6 @@ private:
 
 sensors_poll_context_t::sensors_poll_context_t()
 {
-
     mSensors[proximity] = new ProximitySensor();
     mPollFds[proximity].fd = mSensors[proximity]->getFd();
     mPollFds[proximity].events = POLLIN;
@@ -288,7 +282,7 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
             // some events immediately or just wait if we don't have
             // anything to return
             do {
-            n = poll(mPollFds, numFds, nbEvents ? 0 : -1);
+                n = poll(mPollFds, numFds, nbEvents ? 0 : -1);
             } while (n < 0 && errno == EINTR);
             if (n<0) {
                 ALOGE("poll() failed (%s)", strerror(errno));
@@ -299,7 +293,6 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
                 int result = read(mPollFds[wake].fd, &msg, 1);
                 ALOGE_IF(result<0, "error reading from wake pipe (%s)", strerror(errno));
                 ALOGE_IF(msg != WAKE_MESSAGE, "unknown message on wake queue (0x%02x)", int(msg));
-
                 mPollFds[wake].revents = 0;
             }
         }

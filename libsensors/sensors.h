@@ -52,12 +52,13 @@ __BEGIN_DECLS
 
 /*****************************************************************************/
 
-#define AKM_DEVICE_NAME     "/dev/akm8973_aot"
-
+/*Why _aot*/
+#define AKM_DEVICE_NAME     "/dev/akm8973"
 
 #define EVENT_TYPE_ACCEL_X          ABS_X
 #define EVENT_TYPE_ACCEL_Y          ABS_Y
 #define EVENT_TYPE_ACCEL_Z          ABS_Z
+#define EVENT_TYPE_ACCEL_STATUS     ABS_THROTTLE
 
 #define EVENT_TYPE_YAW              REL_X
 #define EVENT_TYPE_PITCH            REL_Y
@@ -71,11 +72,6 @@ __BEGIN_DECLS
 
 #define EVENT_TYPE_PROXIMITY        ABS_DISTANCE
 #define EVENT_TYPE_LIGHT            ABS_MISC
-
-#define EVENT_TYPE_GYRO_X           REL_RY
-#define EVENT_TYPE_GYRO_Y           REL_RX
-#define EVENT_TYPE_GYRO_Z           REL_RZ
-
 
 // 720 LSG = 1G
 #define LSG                         (720.0f)
@@ -101,12 +97,6 @@ __BEGIN_DECLS
 #define CONVERT_O_P                 (CONVERT_O)
 #define CONVERT_O_R                 (CONVERT_O)
 
-// conversion of gyro data to SI units (radian/sec)
-#define RANGE_GYRO                  (2000.0f*(float)M_PI/180.0f)
-#define CONVERT_GYRO                ((70.0f / 1000.0f) * ((float)M_PI / 180.0f))
-#define CONVERT_GYRO_X              (CONVERT_GYRO)
-#define CONVERT_GYRO_Y              (-CONVERT_GYRO)
-#define CONVERT_GYRO_Z              (CONVERT_GYRO)
 
 #define SENSOR_STATE_MASK           (0x7FFF)
 

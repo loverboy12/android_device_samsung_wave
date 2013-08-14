@@ -19,15 +19,27 @@
 
 #Video Devices
 BOARD_SECOND_CAMERA_DEVICE := /dev/video2
+TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
+TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
 
 # Kernel Config
 TARGET_KERNEL_CONFIG := wave_defconfig
+
+# HWComposer
+BOARD_USES_HWCOMPOSER := true
+
+# Bluedroid
+BOARD_HAVE_BLUETOOTH := true
+BOARD_HAVE_BLUETOOTH_BCM := true
 
 # FM Radio
 BOARD_HAVE_FM_RADIO := true
 BOARD_GLOBAL_CFLAGS += -DHAVE_FM_RADIO
 BOARD_FM_DEVICE := si4709
 
+USE_CAMERA_STUB := false
+
+# Maybe true
 BOARD_USES_GENERIC_AUDIO := false
 
 BOARD_USES_LIBSECRIL_STUB := true
@@ -40,7 +52,11 @@ TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_ARCH_VARIANT_CPU := cortex-a8
-ARCH_ARM_HAVE_TLS_REGISTER := true
+TARGET_CPU_VARIANT := cortex-a8
+ARCH_ARM_HAVE_32_BYTE_CACHE_LINES := true
+ARCH_ARM_HIGH_OPTIMIZATION := true
+ARCH_ARM_HIGH_OPTIMIZATION_COMPAT := true
+ARCH_ARM_NEON_SUPPORTS_UNALIGNED_ACCESS := true
 
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_RADIOIMAGE := true
@@ -50,8 +66,12 @@ TARGET_BOARD_PLATFORM := s5pc110
 TARGET_BOOTLOADER_BOARD_NAME := wave
 TARGET_RECOVERY_INITRC := device/samsung/wave/recovery.rc
 
+
 BOARD_MOBILEDATA_INTERFACE_NAME = "pdp0"
 BOARD_UMS_LUNFILE := /sys/class/android_usb/android0/f_mass_storage/lun/file
+
+# For SD Rom must be false
+TARGET_SEC_INTERNAL_STORAGE := true
 
 # Kernel Source
 TARGET_KERNEL_SOURCE := kernel/samsung/wave
@@ -60,22 +80,28 @@ TARGET_KERNEL_SOURCE := kernel/samsung/wave
 TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT := ./device/samsung/wave/releasetools/wave_ota_from_target_files
 TARGET_RELEASETOOL_IMG_FROM_TARGET_SCRIPT := ./device/samsung/wave/releasetools/wave_img_from_target_files
 
+BOARD_USES_HGL := true
+
+
+DEFAULT_FB_NUM := 2
 
 # Camera
 USE_CAMERA_STUB := false
-ifeq ($(USE_CAMERA_STUB),false)
 BOARD_CAMERA_LIBRARIES := libcamera
-endif
 BOARD_CAMERA_HAVE_ISO := true
 BOARD_CAMERA_HAVE_FLASH := true
 
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/wave/bluetooth
+BOARD_BLUEDROID_VENDOR_CONF := device/samsung/wave/bluetooth/libbt_vndcfg.txt
 
 # Video Devices
 BOARD_V4L2_DEVICE := /dev/video1
 BOARD_CAMERA_DEVICE := /dev/video0
+
+TARGET_GRALLOC_USES_ASHMEM := true
 
 TARGET_SCREEN_WIDTH := 480
 TARGET_SCREEN_HEIGHT := 800
@@ -108,10 +134,7 @@ WIFI_DRIVER_FW_PATH_AP      := "/vendor/firmware/fw_bcmdhd_apsta.bin"
 
 # adb has root
 ADDITIONAL_DEFAULT_PROPERTIES += ro.secure=0
-
-# Bluetooth
-BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/wave/bluetooth 
-BOARD_BLUEDROID_VENDOR_CONF := device/samsung/wave/prebuilt/libbt_vndcfg.txt 
+ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=0
 
 # Vold
 BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
@@ -137,6 +160,9 @@ BOARD_USES_SKTEXTBOX := true
 # Hardware rendering
 USE_OPENGL_RENDERER := true
 
+# Enable WEBGL in WebKit but make Browser slower...
+ENABLE_WEBGL := false
+
 # TARGET_DISABLE_TRIPLE_BUFFERING can be used to disable triple buffering
 # on per target basis. On crespo it is possible to do so in theory
 # to save memory, however, there are currently some limitations in the
@@ -146,6 +172,8 @@ TARGET_DISABLE_TRIPLE_BUFFERING := false
 
 BOARD_ALLOW_EGL_HIBERNATION := true
 
+# hwcomposer: custom vsync ioctl depend wich kernel used 
+BOARD_CUSTOM_VSYNC_IOCTL := true
+
 # Include wave specific stuff
 -include device/samsung/wave/Android.mk
-

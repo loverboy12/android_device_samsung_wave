@@ -840,10 +840,8 @@ int SecCamera::startPreview(void)
         CHECK(ret);
     }
 
-#ifdef HAVE_FLASH
     ret = fimc_v4l2_s_ctrl(m_cam_fd, V4L2_CID_CAMERA_FLASH_MODE, m_params->flash_mode);
     CHECK(ret);
-#endif
 
     // It is a delay for a new frame, not to show the previous bigger ugly picture frame.
     ret = fimc_poll(&m_events_c);
@@ -1494,7 +1492,6 @@ int SecCamera::getSnapshotAndJpeg(unsigned char *yuv_buf, unsigned char *jpeg_bu
 
     ret = fimc_v4l2_enum_fmt(m_cam_fd,m_snapshot_v4lformat);
     CHECK(ret);
-    // FFC: Swap width and height
     ret = fimc_v4l2_s_fmt_cap(m_cam_fd, m_snapshot_height, m_snapshot_width, m_snapshot_v4lformat);
     CHECK(ret);
     ret = fimc_v4l2_reqbufs(m_cam_fd, V4L2_BUF_TYPE_VIDEO_CAPTURE, nframe);
@@ -1719,7 +1716,6 @@ int SecCamera::getAutoFocusResult(void)
             break;
         usleep(AF_DELAY);
     }
-
     if ((count >= FIRST_AF_SEARCH_COUNT) || (ret != AF_SUCCESS)) {
         ALOGV("%s : 1st AF timed out, failed, or was canceled", __func__);
         af_result = 0;
@@ -2357,7 +2353,8 @@ int SecCamera::setTouchAFStartStop(int start_stop)
 {
     ALOGV("%s(touch_af_start_stop (%d))", __func__, start_stop);
 
-    if (m_touch_af_start_stop != start_stop) {
+    if (m_flag_camera_start) {
+        // We need to send this command regardless of previous state to trigger AF
         m_touch_af_start_stop = start_stop;
         if (fimc_v4l2_s_ctrl(m_cam_fd, V4L2_CID_CAMERA_TOUCH_AF_START_STOP, start_stop) < 0) {
             ALOGE("ERR(%s):Fail on V4L2_CID_CAMERA_TOUCH_AF_START_STOP", __func__);
@@ -2659,16 +2656,17 @@ int SecCamera::setObjectPosition(int x, int y)
 {
     ALOGV("%s(setObjectPosition(x=%d, y=%d))", __func__, x, y);
 
-    if (fimc_v4l2_s_ctrl(m_cam_fd, V4L2_CID_CAMERA_OBJECT_POSITION_X, x) < 0) {
-        ALOGE("ERR(%s):Fail on V4L2_CID_CAMERA_OBJECT_POSITION_X", __func__);
-        return -1;
-    }
+    if (m_flag_camera_start) {
+        if (fimc_v4l2_s_ctrl(m_cam_fd, V4L2_CID_CAMERA_OBJECT_POSITION_X, x) < 0) {
+           ALOGE("ERR(%s):Fail on V4L2_CID_CAMERA_OBJECT_POSITION_X", __func__);
+            return -1;
+       }
 
-    if (fimc_v4l2_s_ctrl(m_cam_fd, V4L2_CID_CAMERA_OBJECT_POSITION_Y, y) < 0) {
-        ALOGE("ERR(%s):Fail on V4L2_CID_CAMERA_OBJECT_POSITION_Y", __func__);
-        return -1;
-    }
-
+        if (fimc_v4l2_s_ctrl(m_cam_fd, V4L2_CID_CAMERA_OBJECT_POSITION_Y, y) < 0) {
+            ALOGE("ERR(%s):Fail on V4L2_CID_CAMERA_OBJECT_POSITION_Y", __func__);
+            return -1;
+        	}
+	}
     return 0;
 }
 

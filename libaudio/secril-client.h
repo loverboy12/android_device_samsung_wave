@@ -146,6 +146,7 @@ typedef enum _AudioPath {
 	SOUND_AUDIO_PATH_RECORDING_BT
 } AudioPath;
 
+
 /**
  * Set in-call volume.
  */
@@ -156,6 +157,10 @@ int SetVolume(HRilClient client, SoundType type, int vol_level);
  */
 int SetAudioPath(HRilClient client, AudioPath path);
 
+/**
+ * PCM control packet
+ */
+int PcmIfCtrl(HRilClient client, int enabled);
 
 #ifdef __cplusplus
 };
